@@ -12,11 +12,10 @@ name: My Test Workflow (Skyu Generated)
       - '!.github/workflows/**'
   workflow_dispatch: {}
   repository_dispatch:
-    types: pipeline_71418bef-4810-4d61-b7ac-192f2a302794
+    types: pipeline_c3233cc8-1557-4409-8e6d-75a29b9e0dd0
 env:
   ENCODED_PIPELINE_SECRET: ${{secrets.TESTSERVICE2_CICD_TEST}}
   COMMIT_ID: ${{github.event.client_payload.commitId || github.sha || github.run_id}}
-  Hello: VALUEEEEEEE
 jobs:
   deploy:
     name: Deploy
@@ -33,13 +32,15 @@ jobs:
                 fi
                 echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
                 
-      - name: Start
-        run: |2-
-
-              echo " Starting GitHub Action!" && 
-              echo "STEPS_CAN_PROCEED=true" >> $GITHUB_ENV
-              
-      - name: Step 1
-        run: echo "Hello"
-      - name: step2
-        run: aaa
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Download Terragrunt
+        run: >-
+          wget
+          https://github.com/gruntwork-io/terragrunt/releases/download/v0.50.6/terragrunt_linux_amd64
+          && mv terragrunt_linux_amd64 terragrunt && chmod u+x terragrunt && mv
+          terragrunt /usr/local/bin/terragrunt
+      - name: Terragrunt Version Check
+        run: terragrunt version
