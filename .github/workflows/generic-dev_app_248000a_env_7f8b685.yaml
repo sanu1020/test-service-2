@@ -2,7 +2,7 @@ name: generic-dev_app_248000a_env_7f8b685 Pipeline (Skyu Generated)
 'on':
   workflow_dispatch: {}
   repository_dispatch:
-    types: pipeline_8dc26aef-5771-4127-82ba-1712f604b113
+    types: pipeline_d42e6f0d-076a-4764-9357-3feb8a3dcbbe
 env:
   ENCODED_PIPELINE_SECRET: ${{secrets.TESTSERVICE2_GENERICDEV_APP_248000A_ENV_7F8B685}}
   COMMIT_ID: ${{github.event.client_payload.commitId || github.sha || github.run_id}}
@@ -129,6 +129,23 @@ jobs:
     needs:
       - _status-pending
     steps:
+      - name: Start
+        run: |2-
+
+              echo " Starting GitHub Action!" && 
+              echo "STEPS_CAN_PROCEED=true" >> $GITHUB_ENV
+              
+      - name: 'Run :: Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 'Run :: Checkout Specific Commit'
+        if: ${{ github.event.client_payload.commitId != null }}
+        run: |2-
+
+              git fetch --all
+              git checkout ${{ github.event.client_payload.commitId }} || true
+              
       - name: 'Run :: Decoding Secrets'
         run: |2-
 
@@ -139,8 +156,6 @@ jobs:
                 fi
                 echo "${{ env.ENCODED_PIPELINE_SECRET }}" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while read line; do echo "$line" >> $GITHUB_ENV; echo "::add-mask::${line#*=}"; done
                 
-      - name: Checkout Repo
-        uses: actions/checkout@v3
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
       - name: Download Terragrunt
