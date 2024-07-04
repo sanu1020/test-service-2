@@ -3,16 +3,12 @@ name: My Test Workflow (Skyu Generated)
   push:
     branches:
       - master
-    paths-ignore:
-      - .github/workflows/**
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - .github/workflows/**
   workflow_dispatch: {}
   repository_dispatch:
-    types: pipeline_2a94bd45-68ab-4525-a032-1db15b9e6aa7
+    types: pipeline_b7df76a9-fdcf-441f-8af5-aa6630d1b5d1
 env:
   ENCODED_PIPELINE_SECRET: ${{secrets.TESTSERVICE2_CICD_TEST}}
   COMMIT_ID: ${{github.event.client_payload.commitId || github.sha || github.run_id}}
@@ -42,9 +38,16 @@ jobs:
                 
       - name: Checkout Repo
         uses: actions/checkout@v3
-    
+      - name: Launch Template Starts Status [LAUNCH_TEMPLATE] [STARTED]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Launch-Template&status=Started'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
       - name: Create Credentials File
         run: >-
           mkdir $HOME/.aws/ && touch $HOME/.aws/credentials && echo "[default]"
@@ -65,22 +68,89 @@ jobs:
           terragrunt /usr/local/bin/terragrunt
       - name: Terragrunt Version Check
         run: terragrunt version
-   
+      - name: Push Terragrunt Status [INIT] [IN_PROGRESS]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Init&status=InProgress'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: Terragrunt Init
         run: terragrunt init --terragrunt-non-interactive
- 
-    
+      - name: Push Terragrunt Status [INIT] [FAILED]
+        if: failure()
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Init&status=Failed'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
+      - name: Push Terragrunt Status [INIT] [SUCCESS]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Init&status=Success'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: '[SLEEP]'
         run: sleep 3
-   
+      - name: Push Terragrunt Status [PLAN] [IN_PROGRESS]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Plan&status=InProgress'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: Terragrunt Plan
         run: terragrunt plan --terragrunt-non-interactive
- 
-     
+      - name: Push Terragrunt Status [PLAN] [FAILED]
+        if: failure()
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Plan&status=Failed'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
+      - name: Push Terragrunt Status [PLAN] [SUCCESS]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Plan&status=Success'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: '[SLEEP]'
         run: sleep 3
-   
+      - name: Push Terragrunt Status [APPLY] [IN_PROGRESS]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Apply&status=InProgress'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: Terragrunt Apply
         run: terragrunt apply --terragrunt-non-interactive -auto-approve
- 
-     
+      - name: Push Terragrunt Status [APPLY] [FAILED]
+        if: failure()
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Apply&status=Failed'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
+      - name: Push Terragrunt Status [APPLY] [SUCCESS]
+        run: >-
+          curl --location --request POST
+          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Terragrunt-Apply&status=Success'
+          --header "x-auth-by: sa" --header "x-organization-id:
+          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
+          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
+          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": $(terragrunt
+          output --json)}'
