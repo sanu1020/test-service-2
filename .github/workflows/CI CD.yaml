@@ -8,13 +8,12 @@ name: My Test Workflow (Skyu Generated)
       - master
   workflow_dispatch: {}
   repository_dispatch:
-    types: pipeline_b7df76a9-fdcf-441f-8af5-aa6630d1b5d1
+    types: pipeline_69dc5ea8-decc-4472-ba92-2aea73cf36a8
 env:
   ENCODED_PIPELINE_SECRET: ${{secrets.TESTSERVICE2_CICD_TEST}}
   COMMIT_ID: ${{github.event.client_payload.commitId || github.sha || github.run_id}}
   role-to-assume: '{{.RoleARN}}'
   aws-region: '{{.Region}}'
-  terraform_wrapper: 'false'
 jobs:
   apply:
     name: Apply
@@ -48,6 +47,9 @@ jobs:
           $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: '{{ env.RoleARN }}'
+          aws-region: '{{ env.Region }}'
       - name: Create Credentials File
         run: >-
           mkdir $HOME/.aws/ && touch $HOME/.aws/credentials && echo "[default]"
@@ -60,6 +62,8 @@ jobs:
           $HOME/.aws/credentials
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
       - name: Download Terragrunt
         run: >-
           wget
