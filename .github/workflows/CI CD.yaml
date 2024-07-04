@@ -42,14 +42,7 @@ jobs:
                 
       - name: Checkout Repo
         uses: actions/checkout@v3
-      - name: Launch Template Starts Status [LAUNCH_TEMPLATE] [STARTED]
-        run: >-
-          curl --location --request POST
-          '{{.Api}}/infrastructure/{{.TemplateID}}?stepName=Launch-Template&status=Started'
-          --header "x-auth-by: sa" --header "x-organization-id:
-          $ORGANIZATION_ID" --header "x-project-id: $PROJECT_ID" --header
-          "x-credential-id: $CREDENTIAL_ID" --header "Authorization: Bearer
-          $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
+    
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
       - name: Create Credentials File
