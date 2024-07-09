@@ -3,17 +3,12 @@ name: generic-dev_app_248000a_env_7f8b685 Pipeline (Skyu Generated)
   push:
     branches:
       - main
-    paths-ignore:
-      - .github/workflows/**
   workflow_dispatch: {}
   repository_dispatch:
-    types: pipeline_438f7069-9c0d-4c81-a0b3-cffb7c6c74e8
+    types: pipeline_2d7ade44-1dbf-4d49-b9e3-2f3a95d6730d
 env:
   ENCODED_PIPELINE_SECRET: ${{secrets.TESTSERVICE2_GENERICDEV_APP_248000A_ENV_7F8B685}}
   COMMIT_ID: ${{github.event.client_payload.commitId || github.sha || github.run_id}}
-  role-to-assume: '{{.RoleARN}}'
-  aws-region: '{{.Region}}'
-  terraform_wrapper: 'false'
   DEPLOY_STEP_SHOULD_DEPLOY: 'true'
 jobs:
   code-scan:
@@ -142,23 +137,6 @@ jobs:
     needs:
       - _status-pending
     steps:
-      - name: Start
-        run: |2-
-
-              echo " Starting GitHub Action!" && 
-              echo "STEPS_CAN_PROCEED=true" >> $GITHUB_ENV
-              
-      - name: 'Run :: Checkout repository'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: 'Run :: Checkout Specific Commit'
-        if: ${{ github.event.client_payload.commitId != null }}
-        run: |2-
-
-              git fetch --all
-              git checkout ${{ github.event.client_payload.commitId }} || true
-              
       - name: 'Run :: Decoding Secrets'
         run: |2-
 
@@ -181,6 +159,9 @@ jobs:
           $SERVICE_ACCOUNT_TOKEN" --data '{"terragruntoutputs": {}}'
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: '{{.RoleARN}}'
+          aws-region: '{{.Region}}'
       - name: Create Credentials File
         run: >-
           mkdir $HOME/.aws/ && touch $HOME/.aws/credentials && echo "[default]"
@@ -193,6 +174,8 @@ jobs:
           $HOME/.aws/credentials
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: 'false'
       - name: Download Terragrunt
         run: >-
           wget
